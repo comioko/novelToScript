@@ -34,6 +34,29 @@ public class PromptBuilderService {
 - 意外：计划被打乱，新的危机出现
 - 反转：看似成功，实际隐藏更大危机
 
+【数据一致性要求 - 关键】
+1. time 字段必须与故事背景匹配：
+   - 如果是现代/现实题材，禁止使用"火星日"等科幻时间格式
+   - 使用如"雨夜，傍晚"、"同一日，午夜十二点"等现实时间表达
+
+2. character_id 和 character_name 必须严格一致：
+   - 每个角色只能有一个 name
+   - 禁止让 char_005 既当"幕后声音"又当"黑衣人"或"神秘人"
+   - 如需多个反派角色，必须新增独立角色 ID
+
+3. scene.characters 列表必须完整：
+   - 如果某个 scene 的 dialogue beat 中出现了某角色，该角色必须出现在 scene.characters 列表中
+   - 录音中的声音（如父亲）如果出现在 dialogue beat 中，也需要加入 characters
+
+4. dialogue beat 的 content 格式：
+   - content 只写台词本身，不要重复写说话人前缀
+   - 正确：content: "你凭什么管我？"
+   - 错误：content: "林晚：'你凭什么管我？'"
+
+5. 非 dialogue beat 不写 character_id：
+   - action、sound、transition、narration、camera 类型不需要 character_id
+   - 省略 character_id 字段比写 null 更干净
+
 【YAML Schema】
 ```yaml
 script:
@@ -70,33 +93,41 @@ script:
       title: "场景标题"
       source_chapters: ["chapter_001"]
       location: "具体地点"
-      time: "具体时间（如：火星日第184日，午后）"
+      time: "具体时间（如：雨夜，傍晚 / 同一日，午夜十二点）"
       characters: ["char_001"]
       summary: "场景摘要"
       dramatic_function: "该场景在剧作结构中的作用"
       beats:
-        - type: "action|dialogue|narration|transition|sound|camera"
-          content: "具体内容"
-          character_id: "char_001"  # dialogue 时必须有
-          character_name: "角色名"   # dialogue 时必须有
+        - type: "action"
+          content: "动作描写（不需要 character_id）"
+        - type: "dialogue"
+          content: "对白内容，只写台词本身"
+          character_id: "char_001"
+          character_name: "角色名"
+        - type: "camera"
+          content: "镜头指示，如：特写、推拉镜头等"
+        - type: "sound"
+          content: "音效描写"
+        - type: "narration"
+          content: "旁白叙述"
+        - type: "transition"
+          content: "转场，如：切至：三天后"
   notes:
     adaptation_notes: []
     potential_improvements: []
 ```
 
 【Beat 类型说明】
-- action: 动作/场景描写（具体可拍摄的动作）
-- dialogue: 对白（必须包含 character_id 和 character_name）
-- narration: 旁白/叙述
-- transition: 转场（如："切至：三天后"）
-- sound: 音效（如："警报声突然响起"）
-- camera: 镜头指示（如："镜头推近"）
+- action: 动作/场景描写（具体可拍摄的动作，不需要 character_id）
+- dialogue: 对白（必须包含 character_id 和 character_name，content 只写台词）
+- narration: 旁白/叙述（不需要 character_id）
+- transition: 转场（如："切至：三天后"，不需要 character_id）
+- sound: 音效（如："警报声突然响起"，不需要 character_id）
+- camera: 镜头指示（如："镜头推近"、"特写"，不需要 character_id）
 
-【时间格式建议】
-使用具体的剧本化时间：
-- "火星日第184日，午后" 而非 "白天"
-- "同日，半小时后" 而非 "稍后"
-- "三周后，地球标准时间09:00" 而非 "数周后"
+【时间格式规范】
+- 现代/现实题材：用"雨夜，傍晚"、"同一日，午夜十二点"、"三天后，上午十点"
+- 禁止使用"火星日"、"星际时间"等科幻时间格式（除非故事本身是科幻题材）
 
 请严格按照上述 Schema 输出 YAML。
 """;

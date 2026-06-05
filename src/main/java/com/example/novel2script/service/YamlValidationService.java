@@ -84,6 +84,8 @@ public class YamlValidationService {
         checkRequired(scriptMap, "characters", errors, true);
         checkRequired(scriptMap, "scenes", errors, true);
 
+        // Build character name map for later validation
+        java.util.Map<String, String> characterNameMap = new java.util.HashMap<>();
         Object charactersObj = scriptMap.get("characters");
         if (charactersObj instanceof List) {
             List<?> characters = (List<?>) charactersObj;
@@ -94,6 +96,11 @@ public class YamlValidationService {
                 Object charObj = characters.get(i);
                 if (charObj instanceof Map) {
                     Map<?, ?> charMap = (Map<?, ?>) charObj;
+                    String charId = charMap.get("id") != null ? String.valueOf(charMap.get("id")) : null;
+                    String charName = charMap.get("name") != null ? String.valueOf(charMap.get("name")) : null;
+                    if (charId != null && charName != null) {
+                        characterNameMap.put(charId, charName);
+                    }
                     if (!charMap.containsKey("id")) {
                         errors.add("Character at index " + i + " missing 'id'");
                     }
@@ -114,6 +121,8 @@ public class YamlValidationService {
                 Object sceneObj = scenes.get(i);
                 if (sceneObj instanceof Map) {
                     Map<?, ?> sceneMap = (Map<?, ?>) sceneObj;
+                    String sceneTitle = sceneMap.get("title") != null ? String.valueOf(sceneMap.get("title")) : "scene_" + i;
+
                     if (!sceneMap.containsKey("id")) {
                         errors.add("Scene at index " + i + " missing 'id'");
                     }
@@ -121,14 +130,17 @@ public class YamlValidationService {
                         errors.add("Scene at index " + i + " missing 'title'");
                     }
                     if (!sceneMap.containsKey("beats")) {
-                        errors.add("Scene at index " + i + " missing 'beats'");
+                        errors.add("Scene " + sceneTitle + " missing 'beats'");
                     } else {
                         Object beatsObj = sceneMap.get("beats");
                         if (beatsObj instanceof List) {
                             List<?> beats = (List<?>) beatsObj;
                             if (beats.isEmpty()) {
-                                errors.add("Scene at index " + i + " has empty 'beats' array");
+                                errors.add("Scene " + sceneTitle + " has empty 'beats' array");
                             }
+
+                            // Collect character IDs appearing in dialogue beats
+                            java.util.Set<String> dialogueCharIds = new java.util.HashSet<>();
                             for (int j = 0; j < beats.size(); j++) {
                                 Object beatObj = beats.get(j);
                                 if (beatObj instanceof Map) {
@@ -136,16 +148,44 @@ public class YamlValidationService {
                                     String type = String.valueOf(beatMap.get("type"));
                                     if ("dialogue".equals(type)) {
                                         if (!beatMap.containsKey("character_id")) {
-                                            errors.add("Dialogue beat at scene " + i + ", beat " + j + " missing 'character_id'");
+                                            errors.add("Dialogue beat at scene " + sceneTitle + ", beat " + j + " missing 'character_id'");
+                                        } else {
+                                            dialogueCharIds.add(String.valueOf(beatMap.get("character_id")));
                                         }
                                         if (!beatMap.containsKey("character_name")) {
-                                            errors.add("Dialogue beat at scene " + i + ", beat " + j + " missing 'character_name'");
+                                            errors.add("Dialogue beat at scene " + sceneTitle + ", beat " + j + " missing 'character_name'");
                                         }
                                         if (!beatMap.containsKey("content")) {
-                                            errors.add("Dialogue beat at scene " + i + ", beat " + j + " missing 'content'");
+                                            errors.add("Dialogue beat at scene " + sceneTitle + ", beat " + j + " missing 'content'");
+                                        } else {
+                                            String content = String.valueOf(beatMap.get("content"));
+                                            // Check if dialogue content contains speaker prefix like "林晚："
+                                            if (content.contains("：") && !content.startsWith("\"") && !content.startsWith("'")) {
+                                                warnings.add("Dialogue beat at scene " + sceneTitle + " may contain speaker prefix in content: " + content.substring(0, Math.min(30, content.length())) + "...");
+                                            }
                                         }
                                     }
                                 }
+                            }
+
+                            // Check if scene.characters contains all dialogue character IDs
+                            Object sceneCharsObj = sceneMap.get("characters");
+                            if (sceneCharsObj instanceof List) {
+                                List<?> sceneChars = (List<?>) sceneCharsObj;
+                                for (String charId : dialogueCharIds) {
+                                    boolean found = false;
+                                    for (Object sc : sceneChars) {
+                                        if (String.valueOf(sc).equals(charId)) {
+                                            found = true;
+                                            break;
+                                        }
+                                    }
+                                    if (!found) {
+                                        errors.add("Scene " + sceneTitle + ": character " + charId + " appears in dialogue but not in scene.characters list");
+                                    }
+                                }
+                            } else if (!dialogueCharIds.isEmpty()) {
+                                errors.add("Scene " + sceneTitle + " missing 'characters' list but has dialogue beats");
                             }
                         }
                     }
