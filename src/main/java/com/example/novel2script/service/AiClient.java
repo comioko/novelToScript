@@ -254,7 +254,7 @@ script:
         - type: "dialogue"
           character_id: "char_002"
           character_name: "艾琳"
-          content: "一颗流浪行星。代号\"克洛诺斯\"。它会在九十天后撞击..."
+          content: "一颗流浪行星。代号'克洛诺斯'。它会在九十天后撞击..."
         - type: "action"
           content: "艾琳突然坐起身，抓住林浩的手臂。"
         - type: "dialogue"
