@@ -79,9 +79,14 @@ function showResult(response) {
     elements.errorSection.style.display = 'none';
 
     let validationHtml = '';
+
+    if (response.mockMode) {
+        validationHtml += '<div class="validation-item warning">⚠ 当前为 Mock 模式（未配置 AI API）</div>';
+    }
+
     if (response.validation) {
         const v = response.validation;
-        validationHtml = '<div class="validation-item success">✓ 剧本生成成功</div>';
+        validationHtml += '<div class="validation-item success">✓ 剧本生成成功</div>';
 
         if (v.errors && v.errors.length > 0) {
             v.errors.forEach(err => {

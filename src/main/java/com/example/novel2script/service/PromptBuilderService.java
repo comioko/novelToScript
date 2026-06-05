@@ -11,11 +11,28 @@ public class PromptBuilderService {
 【重要规则】
 1. 只输出 YAML，不要输出任何解释文字
 2. YAML 必须符合以下 Schema 结构
-3. 内容必须来自输入小说，不得凭空编造
+3. 内容必须来自输入小说，不得凭空编造核心剧情
 4. 对白要自然流畅，符合角色性格
 5. 动作描写简洁，可拍摄
 6. 心理描写应转化为动作、对白或旁白
 7. 如果信息不足，可以合理补全，但不要偏离原文核心
+
+【剧本结构要求 - 重要】
+一个30分钟影视剧本应该有以下结构：
+- 至少 6-10 个场景
+- 每个场景至少 5-8 个 beats
+- 每个场景需要有起承转合
+- 必须有中段反转或冲突升级
+- 必须有高潮场景
+- 必须有情感落点或悬念
+
+【戏剧张力要求 - 重要】
+不要让主角一路顺利达成目标。需要制造阻力：
+- 质疑：当主角提出发现时，被其他人质疑
+- 内部矛盾：不同角色之间有立场冲突
+- 时间压力：紧迫的deadline
+- 意外：计划被打乱，新的危机出现
+- 反转：看似成功，实际隐藏更大危机
 
 【YAML Schema】
 ```yaml
@@ -23,7 +40,7 @@ script:
   schema_version: "1.0"
   title: "剧本标题"
   logline: "一句话故事梗概（不超过50字）"
-  synopsis: "完整故事梗概"
+  synopsis: "完整故事梗概，包含起承转合"
   metadata:
     script_type: "SCREENPLAY|DRAMATIC|SHORT_DRAMA|RADIO_DRAMA"
     target_language: "zh-CN|en-US"
@@ -42,23 +59,24 @@ script:
     - id: "char_001"
       name: "角色名"
       role: "protagonist|antagonist|supporting"
-      description: "角色描述"
+      description: "角色描述（含年龄、身份、性格特点）"
       motivation: "角色动机"
       relationships:
         - target_character_id: "char_002"
           relation: "关系描述"
+          arc: "关系变化过程（如：陌生人 -> 盟友 -> 彼此信任）"
   scenes:
     - id: "scene_001"
       title: "场景标题"
       source_chapters: ["chapter_001"]
-      location: "地点"
-      time: "时间"
+      location: "具体地点"
+      time: "具体时间（如：火星日第184日，午后）"
       characters: ["char_001"]
       summary: "场景摘要"
       dramatic_function: "该场景在剧作结构中的作用"
       beats:
         - type: "action|dialogue|narration|transition|sound|camera"
-          content: "内容"
+          content: "具体内容"
           character_id: "char_001"  # dialogue 时必须有
           character_name: "角色名"   # dialogue 时必须有
   notes:
@@ -67,12 +85,18 @@ script:
 ```
 
 【Beat 类型说明】
-- action: 动作/场景描写
+- action: 动作/场景描写（具体可拍摄的动作）
 - dialogue: 对白（必须包含 character_id 和 character_name）
 - narration: 旁白/叙述
-- transition: 转场
-- sound: 音效
-- camera: 镜头指示
+- transition: 转场（如："切至：三天后"）
+- sound: 音效（如："警报声突然响起"）
+- camera: 镜头指示（如："镜头推近"）
+
+【时间格式建议】
+使用具体的剧本化时间：
+- "火星日第184日，午后" 而非 "白天"
+- "同日，半小时后" 而非 "稍后"
+- "三周后，地球标准时间09:00" 而非 "数周后"
 
 请严格按照上述 Schema 输出 YAML。
 """;

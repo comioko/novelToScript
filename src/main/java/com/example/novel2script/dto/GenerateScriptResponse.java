@@ -4,6 +4,7 @@ public class GenerateScriptResponse {
 
     private boolean success;
     private String message;
+    private boolean mockMode;
     private String yaml;
     private ValidationResult validation;
     private java.util.List<ChapterDto> chapters;
@@ -76,5 +77,13 @@ public class GenerateScriptResponse {
 
     public void setChapters(java.util.List<ChapterDto> chapters) {
         this.chapters = chapters;
+    }
+
+    public boolean isMockMode() {
+        return mockMode;
+    }
+
+    public void setMockMode(boolean mockMode) {
+        this.mockMode = mockMode;
     }
 }

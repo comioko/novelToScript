@@ -66,6 +66,7 @@ public class ScriptGenerationService {
                 chaptersSummary
         );
 
+        boolean isMockMode = !aiClient.isConfigured();
         String yamlContent;
         try {
             yamlContent = aiClient.callChatCompletion(systemPrompt, userPrompt);
@@ -74,6 +75,8 @@ public class ScriptGenerationService {
             response.setMessage("AI 调用失败: " + e.getMessage());
             return response;
         }
+
+        response.setMockMode(isMockMode);
 
         yamlContent = cleanYamlResponse(yamlContent);
 
