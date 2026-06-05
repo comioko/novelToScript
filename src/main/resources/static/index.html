@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 小说转剧本工具</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AI 小说转剧本工具</h1>
+            <p class="subtitle">将小说文本转换为结构化剧本 YAML</p>
+        </header>
+
+        <main>
+            <section class="input-section">
+                <h2>输入小说文本</h2>
+                <div class="form-group">
+                    <textarea id="novelText" placeholder="请粘贴至少3个章节的小说文本...
+
+支持的章节标题格式：
+- 第1章 / 第一章
+- Chapter 1 / CHAPTER 1
+- 1. / 01
+
+示例：
+第一章 相遇
+火星基地外围，黄沙漫天。林浩穿着宇航服在检查一个废弃的采矿探测器。
+...
+
+第二章 流浪行星
+两人发现流浪行星的轨迹，意识到它将在三个月内撞击两颗主星。
+...
+
+第三章 联合行动
+林浩和艾琳决定联合两个文明，共同应对宇宙危机。
+..."></textarea>
+                    <div class="chapter-hint" id="chapterHint"></div>
+                </div>
+
+                <div class="options-grid">
+                    <div class="form-group">
+                        <label for="scriptType">剧本类型</label>
+                        <select id="scriptType">
+                            <option value="SCREENPLAY">影视剧本</option>
+                            <option value="DRAMATIC">戏剧剧本</option>
+                            <option value="SHORT_DRAMA">短剧剧本</option>
+                            <option value="RADIO_DRAMA">广播剧剧本</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="targetLanguage">目标语言</label>
+                        <select id="targetLanguage">
+                            <option value="zh-CN">中文</option>
+                            <option value="en-US">英文</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="adaptationStyle">改编风格</label>
+                        <select id="adaptationStyle">
+                            <option value="FAITHFUL">忠于原著</option>
+                            <option value="DRAMATIC">强化戏剧冲突</option>
+                            <option value="COMMERCIAL">更商业化</option>
+                            <option value="SUSPENSEFUL">更悬疑</option>
+                            <option value="COMEDIC">更轻喜剧</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="targetDuration">目标时长（分钟）</label>
+                        <input type="number" id="targetDuration" value="30" min="1" max="300">
+                    </div>
+                </div>
+
+                <button id="generateBtn" class="btn-primary">生成剧本</button>
+            </section>
+
+            <section class="status-section" id="statusSection" style="display: none;">
+                <div class="status-card" id="statusCard">
+                    <span class="status-icon" id="statusIcon"></span>
+                    <span class="status-text" id="statusText"></span>
+                </div>
+            </section>
+
+            <section class="result-section" id="resultSection" style="display: none;">
+                <h2>生成结果</h2>
+
+                <div class="validation-panel" id="validationPanel">
+                    <h3>校验结果</h3>
+                    <div id="validationContent"></div>
+                </div>
+
+                <div class="yaml-panel">
+                    <div class="yaml-header">
+                        <h3>YAML 剧本</h3>
+                        <div class="yaml-actions">
+                            <button id="copyBtn" class="btn-secondary">复制 YAML</button>
+                            <button id="downloadBtn" class="btn-secondary">下载 .yaml</button>
+                        </div>
+                    </div>
+                    <pre id="yamlOutput"></pre>
+                </div>
+            </section>
+
+            <section class="error-section" id="errorSection" style="display: none;">
+                <h2>错误信息</h2>
+                <div class="error-card" id="errorContent"></div>
+            </section>
+        </main>
+
+        <footer>
+            <p>AI 小说转剧本工具 | 使用 AI 将小说文本转换为结构化剧本</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
