@@ -425,7 +425,7 @@ script:
         - type: "action"
           content: "两人相视。远处，地球的蓝色弧线在星空中熠熠发光。"
         - type: "transition"
-          content: "淡出。字幕升起：\"六十三天后\"。"
+          content: "淡出。字幕升起：'六十三天后'。"
   notes:
     adaptation_notes:
       - "将小说中的心理描写转化为动作和对白。"

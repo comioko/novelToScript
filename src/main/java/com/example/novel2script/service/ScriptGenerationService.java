@@ -128,6 +128,12 @@ public class ScriptGenerationService {
         cleaned = cleaned.replaceAll("^```\\s*", "");
         cleaned = cleaned.replaceAll("\\s*```$", "");
 
+        // Replace Chinese quotation marks with single quotes to prevent YAML parsing errors
+        cleaned = cleaned.replace((char) 0x201C, '\'');  // left double quote
+        cleaned = cleaned.replace((char) 0x201D, '\'');  // right double quote
+        cleaned = cleaned.replace((char) 0x2018, '\'');  // left single quote
+        cleaned = cleaned.replace((char) 0x2019, '\'');  // right single quote
+
         return cleaned.trim();
     }
 
@@ -143,6 +149,7 @@ public class ScriptGenerationService {
                     error.contains("missing 'title'") ||
                     error.contains("missing 'beats'") ||
                     error.contains("missing 'character_id'") ||
+                    error.contains("missing 'character_name'") ||
                     error.contains("appears in dialogue but not in scene.characters")) {
                 return true;
             }

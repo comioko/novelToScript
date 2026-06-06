@@ -127,13 +127,33 @@ script:
     potential_improvements: []
 ```
 
-【Beat 类型说明】
+【Beat 类型说明 - 重要】
 - action: 动作/场景描写（具体可拍摄的动作，不需要 character_id）
-- dialogue: 对白（必须包含 character_id 和 character_name，content 只写台词）
+- dialogue: 对白（**必须同时包含 character_id、character_name 和 content，且 content 不能有说话人前缀**）
 - narration: 旁白/叙述（不需要 character_id）
-- transition: 转场（如："切至：三天后"，不需要 character_id）
-- sound: 音效（如："警报声突然响起"，不需要 character_id）
-- camera: 镜头指示（如："镜头推近"、"特写"，不需要 character_id）
+- transition: 转场（不需要 character_id）
+- sound: 音效（不需要 character_id）
+- camera: 镜头指示（不需要 character_id）
+
+【dialogue beat 格式 - 违反会校验失败】
+每个 dialogue beat 必须同时包含三个字段：
+- character_id: 如 "char_001"
+- character_name: 如 "林晚"
+- content: **只写台词本身，不要包含说话人前缀**
+
+正确示例：
+```yaml
+- type: "dialogue"
+  character_id: "char_001"
+  character_name: "林晚"
+  content: "你凭什么管我？"
+```
+
+错误示例（校验会失败）：
+```yaml
+- type: "dialogue"
+  content: "林晚：你凭什么管我？"  # 错误：包含说话人前缀
+```
 
 【时间格式规范】
 - 现代/现实题材：用"雨夜，傍晚"、"同一日，午夜十二点"、"三天后，上午十点"
@@ -143,28 +163,41 @@ script:
 """;
 
     private static final String REPAIR_SYSTEM_PROMPT = """
-你是一位 YAML 修复专家。以下 YAML 可能存在语法错误或缺少必要字段。
+你是一位 YAML 修复专家。以下 YAML 可能存在多种错误。
 
-【你的任务】
+【你的任务 - 按优先级处理】
 1. 修复 YAML 语法错误
-2. 补全缺失的必需字段
-3. 修复 scene.characters 不完整问题（重要）：
-   - 逐个检查每个 scene 的 dialogue beat 中出现的 character_id
-   - 确保每个 character_id 都出现在该 scene 的 characters 列表中
-   - 如果某个 dialogue beat 中的角色不在 scene.characters 中，必须加入
-4. 不要改变核心剧情内容
-5. 只输出修复后的完整 YAML
+2. 补全所有缺失的必需字段
+3. 修复 dialogue beat 缺失 character_id 和 character_name 的问题（重要）：
+   - 如果某个 dialogue beat 缺少 character_id 或 character_name
+   - 根据 content 中的说话人前缀（如"林晚：""顾沉："）推断角色
+   - 从 script.characters 列表中找到匹配的角色 ID 和 name
+   - 如果找不到匹配角色，在该 scene 的 characters 中添加新角色
+4. 移除 dialogue beat content 中的说话人前缀：
+   - 如果 content 是 "林晚：你好" 要改成 "你好"
+   - 说话人信息已经由 character_id 和 character_name 表示，不需要重复
+5. 修复 scene.characters 不完整问题：
+   - 确保每个 scene 的 dialogue beat 中出现的所有角色 ID 都在该 scene 的 characters 列表中
+6. 不要改变核心剧情内容
+7. 只输出修复后的完整 YAML
 
-【必须保留的字段】
-- script.schema_version
-- script.title
-- script.characters (至少1个)
-- script.scenes (至少1个)
-- script.scenes[].beats (每个场景至少1个 beat)
+【字符处理注意】
+- content 中如果包含双引号 " 或单引号 '，确保它们是英文引号，不是中文引号
+- YAML 字符串中的中文引号会导致解析失败
 
 【场景角色修复示例】
 如果 scene_003 的 beats 中有 dialogue 使用了 char_003 和 char_004，但 characters 只有 ["char_003"]，
 必须把 characters 改成 ["char_003", "char_004"]。
+
+【dialogue beat 修复示例】
+如果原始内容是：
+    - type: "dialogue"
+      content: "顾沉：因为你父亲的事，不是意外。"
+缺少 character_id 和 character_name，应该修复为：
+    - type: "dialogue"
+      content: "因为你父亲的事，不是意外。"
+      character_id: "char_003"
+      character_name: "顾沉"
 
 【输出格式】
 只输出 YAML，不要任何解释。
