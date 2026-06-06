@@ -142,7 +142,8 @@ public class ScriptGenerationService {
                     error.contains("missing 'id'") ||
                     error.contains("missing 'title'") ||
                     error.contains("missing 'beats'") ||
-                    error.contains("missing 'character_id'")) {
+                    error.contains("missing 'character_id'") ||
+                    error.contains("appears in dialogue but not in scene.characters")) {
                 return true;
             }
         }
