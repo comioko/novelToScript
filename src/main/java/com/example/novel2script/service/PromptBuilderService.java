@@ -34,7 +34,7 @@ public class PromptBuilderService {
 - 意外：计划被打乱，新的危机出现
 - 反转：看似成功，实际隐藏更大危机
 
-【数据一致性要求 - 关键】
+【数据一致性要求 - 关键 - 违反会导致校验失败】
 1. time 字段必须与故事背景匹配：
    - 如果是现代/现实题材，禁止使用"火星日"等科幻时间格式
    - 使用如"雨夜，傍晚"、"同一日，午夜十二点"等现实时间表达
@@ -42,11 +42,15 @@ public class PromptBuilderService {
 2. character_id 和 character_name 必须严格一致：
    - 每个角色只能有一个 name
    - 禁止让 char_005 既当"幕后声音"又当"黑衣人"或"神秘人"
-   - 如需多个反派角色，必须新增独立角色 ID
+   - 如需多个反派角色，必须新增独立角色 ID（如 char_006、char_007）
 
-3. scene.characters 列表必须完整：
-   - 如果某个 scene 的 dialogue beat 中出现了某角色，该角色必须出现在 scene.characters 列表中
-   - 录音中的声音（如父亲）如果出现在 dialogue beat 中，也需要加入 characters
+3. scene.characters 列表必须完整（最容易出错，必须严格执行）：
+   在编写每个 scene 的 beats 时，你必须同时维护该 scene 的 characters 列表。
+   规则：
+   - 每当你在某个 scene 的 dialogue beat 中使用一个新角色，就必须把这个角色的 ID 加入该 scene 的 characters 列表
+   - 例如：scene_003 中你想让 char_003 说对白，那么 scene_003 的 characters 必须是 ["char_001", "char_003"]（不能遗漏 char_003）
+   - 录音中的声音（如父亲 char_002）在 dialogue beat 中出现时，也需要加入 characters
+   - 最后生成完成后，必须逐个检查每个 scene：确保该 scene 所有 dialogue beat 中出现的 character_id，都出现在该 scene 的 characters 列表中
 
 4. dialogue beat 的 content 格式：
    - content 只写台词本身，不要重复写说话人前缀
@@ -56,6 +60,12 @@ public class PromptBuilderService {
 5. 非 dialogue beat 不写 character_id：
    - action、sound、transition、narration、camera 类型不需要 character_id
    - 省略 character_id 字段比写 null 更干净
+
+【生成步骤 - 请严格执行】
+1. 先确定所有角色（char_001, char_002, ...）
+2. 为每个 scene 确定出场角色列表 characters
+3. 编写该 scene 的 beats，每使用一个角色说对白，就确认该角色已在 characters 中
+4. 完成后逐 scene 复查： dialogue beat 中的 character_id 是否都在 characters 列表中
 
 【YAML Schema】
 ```yaml
@@ -94,7 +104,7 @@ script:
       source_chapters: ["chapter_001"]
       location: "具体地点"
       time: "具体时间（如：雨夜，傍晚 / 同一日，午夜十二点）"
-      characters: ["char_001"]
+      characters: ["char_001"]  # 重要：必须包含该场景所有会说话的角色 ID
       summary: "场景摘要"
       dramatic_function: "该场景在剧作结构中的作用"
       beats:
@@ -138,8 +148,12 @@ script:
 【你的任务】
 1. 修复 YAML 语法错误
 2. 补全缺失的必需字段
-3. 不要改变核心剧情内容
-4. 只输出修复后的完整 YAML
+3. 修复 scene.characters 不完整问题（重要）：
+   - 逐个检查每个 scene 的 dialogue beat 中出现的 character_id
+   - 确保每个 character_id 都出现在该 scene 的 characters 列表中
+   - 如果某个 dialogue beat 中的角色不在 scene.characters 中，必须加入
+4. 不要改变核心剧情内容
+5. 只输出修复后的完整 YAML
 
 【必须保留的字段】
 - script.schema_version
@@ -147,6 +161,10 @@ script:
 - script.characters (至少1个)
 - script.scenes (至少1个)
 - script.scenes[].beats (每个场景至少1个 beat)
+
+【场景角色修复示例】
+如果 scene_003 的 beats 中有 dialogue 使用了 char_003 和 char_004，但 characters 只有 ["char_003"]，
+必须把 characters 改成 ["char_003", "char_004"]。
 
 【输出格式】
 只输出 YAML，不要任何解释。
