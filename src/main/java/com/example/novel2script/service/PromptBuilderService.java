@@ -63,9 +63,14 @@ public class PromptBuilderService {
 
 【生成步骤 - 请严格执行】
 1. 先确定所有角色（char_001, char_002, ...）
-2. 为每个 scene 确定出场角色列表 characters
-3. 编写该 scene 的 beats，每使用一个角色说对白，就确认该角色已在 characters 中
+2. 为每个 scene 确定出场角色列表 characters（这是最重要的一步！）
+3. 编写该 scene 的 beats，确保每个 dialogue beat 中的角色 ID 都在该 scene 的 characters 列表中
 4. 完成后逐 scene 复查： dialogue beat 中的 character_id 是否都在 characters 列表中
+
+【常见错误 - 务必避免】
+以下错误会导致校验失败：
+- scene_001 的 characters 列为 ["char_001", "char_003"]，但 beats 中使用了 char_002
+- 解决方法：先确定 scene 出场角色，再编写 beats。如果 beats 需要某个角色说话，该角色必须已在 characters 列表中
 
 【YAML Schema】
 ```yaml
@@ -166,7 +171,7 @@ script:
 你是一位 YAML 修复专家。以下 YAML 可能存在多种错误。
 
 【你的任务 - 按优先级处理】
-1. 修复 YAML 语法错误
+1. 修复 YAML 语法错误（最重要！）
 2. 补全所有缺失的必需字段
 3. 修复 dialogue beat 缺失 character_id 和 character_name 的问题（重要）：
    - 如果某个 dialogue beat 缺少 character_id 或 character_name
@@ -181,9 +186,19 @@ script:
 6. 不要改变核心剧情内容
 7. 只输出修复后的完整 YAML
 
+【YAML 语法错误修复 - 最常见的问题】
+如果 YAML 解析报错 "expected <block end>, but found '<scalar>'"，
+通常是因为字符串值没有正确闭合引号。请检查：
+- 每个字符串值（title, content, description 等）的引号是否闭合
+- 如果 synopsis 或其他长文本使用了多行字符串，确保引号正确闭合
+- 修复示例：
+  错误：synopsis: "这是未闭合的字符串
+  正确：synopsis: "这是正确闭合的字符串"
+
 【字符处理注意】
 - content 中如果包含双引号 " 或单引号 '，确保它们是英文引号，不是中文引号
 - YAML 字符串中的中文引号会导致解析失败
+- 如果字符串中需要使用引号，使用单引号包裹双引号：content: '他说："你好"'
 
 【场景角色修复示例】
 如果 scene_003 的 beats 中有 dialogue 使用了 char_003 和 char_004，但 characters 只有 ["char_003"]，

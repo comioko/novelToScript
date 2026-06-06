@@ -1,0 +1,5 @@
+设计文档在 docs/schema.md文件下
+
+视频是：demo.mp4
+
+测试用例文本：docs/sample-novel.txt

@@ -150,7 +150,9 @@ public class ScriptGenerationService {
                     error.contains("missing 'beats'") ||
                     error.contains("missing 'character_id'") ||
                     error.contains("missing 'character_name'") ||
-                    error.contains("appears in dialogue but not in scene.characters")) {
+                    error.contains("appears in dialogue but not in scene.characters") ||
+                    error.contains("Failed to parse YAML") ||
+                    error.contains("YAML syntax error")) {
                 return true;
             }
         }
