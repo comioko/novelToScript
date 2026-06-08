@@ -4,6 +4,7 @@ AI 驱动的工具，将小说文本自动转换为结构化剧本 YAML。
 ## 首先看
 设计文档：[docs/schema.md](docs/schema.md)
 测试用例文本：[docs/sample-novel.txt](docs/sample-novel.txt)
+
 [demo介绍视频](https://www.bilibili.com/video/BV1L4EM6aEXx/?spm_id_from=333.1387.homepage.video_card.click&vd_source=5e7c02e6c7d6f7a68f7028bfbc1f4bf7)
 
 ## 功能列表
