@@ -1,6 +1,9 @@
 # AI 小说转剧本工具
 
 AI 驱动的工具，将小说文本自动转换为结构化剧本 YAML。
+## demo介绍视频
+
+[demo介绍视频](https://www.bilibili.com/video/BV1L4EM6aEXx/?spm_id_from=333.1387.homepage.video_card.click&vd_source=5e7c02e6c7d6f7a68f7028bfbc1f4bf7)
 
 ## 功能列表
 
